@@ -7,9 +7,14 @@ const ApiFeature = require("../helper/apiFeature");
 //All Product
 exports.getAllProducts = catchAyncError(async (req, res) => {
     
-    const apiFeature = new ApiFeature(Product.find(), req.query).search();
+    const resultPerPage = 5;
+    const productCount = await Product.countDocuments();
+    const apiFeature = new ApiFeature(Product.find(), req.query)
+        .search()
+        .filter()
+        .pagination(resultPerPage);
     const product = await apiFeature.query;
-    return successResponse(res, product);
+    return successResponse(res, {...product, productCount});
 });
 
 //Create Product
