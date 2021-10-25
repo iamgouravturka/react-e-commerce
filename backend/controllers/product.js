@@ -1,27 +1,29 @@
+const ErrorHandler = require("../helper/errorHandler");
 const { successResponse, errorResponse } = require("../helper/response");
+const catchAyncError = require("../middleware/catchAyncError");
 const Product = require("../models/product");
 
 //All Product
-exports.getAllProducts = async (req, res) => {
+exports.getAllProducts = catchAyncError(async (req, res) => {
     
     const product = await Product.find();
     return successResponse(res, product);
-}
+});
 
 //Create Product
-exports.createProduct = async (req, res) => {
+exports.createProduct = catchAyncError(async (req, res) => {
 
     const product = await Product.create(req.body);
     return successResponse(res, product, 201);
-}
+});
 
 //Update Product
-exports.updateProduct = async (req, res) => {
+exports.updateProduct = catchAyncError(async (req, res, next) => {
 
     const product = await Product.findById(req.params.id);
 
     if(!product) {
-        return errorResponse(res, { message: "No product found " });
+        return next(new ErrorHandler('No product found'))
     }
 
     const result = await Product.findOneAndUpdate(req.params.id, req.body, {
@@ -31,30 +33,30 @@ exports.updateProduct = async (req, res) => {
     })
 
     return successResponse(res, result);
-}
+});
 
 //Delete Product
-exports.deleteProduct = async (req, res) => {
+exports.deleteProduct = catchAyncError(async (req, res, next) => {
 
     const product = await Product.findById(req.params.id);
 
     if(!product) {
-        return errorResponse(res, { message: "No product found " });
+        return next(new ErrorHandler('No product found'))
     }
 
     product.remove();
 
     return successResponse(res);
-}
+});
 
 //Product Detail
-exports.productDetail = async (req, res) => {
+exports.productDetail = catchAyncError(async (req, res, next) => {
 
     const product = await Product.findById(req.params.id);
 
     if(!product) {
-        return errorResponse(res, { message: "No product found " });
+        return next(new ErrorHandler('No product found'))
     }
 
     return successResponse(res, product);
-}
+});
