@@ -3,6 +3,7 @@ const { successResponse, errorResponse } = require("../helper/response");
 const catchAyncError = require("../middleware/catchAyncError");
 const User = require("../models/user");
 const ApiFeature = require("../helper/apiFeature");
+const sendToken = require("../helper/jwtToken");
 
 //register
 exports.register = catchAyncError(async (req, res) => {
@@ -19,9 +20,7 @@ exports.register = catchAyncError(async (req, res) => {
         }
     });
 
-    const token = user.getJwtToken();
-
-    return successResponse(res, { token: token }, 201);
+    sendToken(user, 201, res);
 });
 
 //login
@@ -47,5 +46,5 @@ exports.login = catchAyncError(async (req, res, next) => {
 
     const token = user.getJwtToken();
 
-    return successResponse(res, { token: token }, 201);
+    sendToken(user, 200, res);
 });
