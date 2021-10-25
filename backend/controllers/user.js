@@ -4,20 +4,7 @@ const catchAyncError = require("../middleware/catchAyncError");
 const User = require("../models/user");
 const ApiFeature = require("../helper/apiFeature");
 
-//All Product
-exports.getAllProducts = catchAyncError(async (req, res) => {
-    
-    const resultPerPage = 5;
-    const productCount = await Product.countDocuments();
-    const apiFeature = new ApiFeature(Product.find(), req.query)
-        .search()
-        .filter()
-        .pagination(resultPerPage);
-    const product = await apiFeature.query;
-    return successResponse(res, {...product, productCount});
-});
-
-//Create Product
+//register
 exports.register = catchAyncError(async (req, res) => {
 
     const { name, email, password } = req.body;
@@ -32,49 +19,33 @@ exports.register = catchAyncError(async (req, res) => {
         }
     });
 
-    return successResponse(res, user, 201);
+    const token = user.getJwtToken();
+
+    return successResponse(res, { token: token }, 201);
 });
 
-//Update Product
-exports.updateProduct = catchAyncError(async (req, res, next) => {
+//login
+exports.login = catchAyncError(async (req, res, next) => {
 
-    const product = await Product.findById(req.params.id);
-
-    if(!product) {
-        return next(new ErrorHandler('No product found'))
+    const { email, password } = req.body;
+    
+    if(!email || !password) {
+        return next(new ErrorHandler("Invalid Email Or Password", 401));
     }
 
-    const result = await Product.findOneAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true,
-        useFindAndModify: false
-    })
+    const user = await User.findOne({ email }).select("+password");
 
-    return successResponse(res, result);
-});
-
-//Delete Product
-exports.deleteProduct = catchAyncError(async (req, res, next) => {
-
-    const product = await Product.findById(req.params.id);
-
-    if(!product) {
-        return next(new ErrorHandler('No product found'))
+    if(!user) {
+        return next(new ErrorHandler("Invalid Email Or Password", 401));
     }
 
-    product.remove();
+    const isPasswordMatched = user.comparePassword(password);
 
-    return successResponse(res);
-});
+    if(!isPasswordMatched) {
+        return next(new ErrorHandler("Invalid Email Or Password", 401));
+    }    
 
-//Product Detail
-exports.productDetail = catchAyncError(async (req, res, next) => {
+    const token = user.getJwtToken();
 
-    const product = await Product.findById(req.params.id);
-
-    if(!product) {
-        return next(new ErrorHandler('No product found'))
-    }
-
-    return successResponse(res, product);
+    return successResponse(res, { token: token }, 201);
 });
