@@ -2,11 +2,13 @@ const ErrorHandler = require("../helper/errorHandler");
 const { successResponse, errorResponse } = require("../helper/response");
 const catchAyncError = require("../middleware/catchAyncError");
 const Product = require("../models/product");
+const ApiFeature = require("../helper/apiFeature");
 
 //All Product
 exports.getAllProducts = catchAyncError(async (req, res) => {
     
-    const product = await Product.find();
+    const apiFeature = new ApiFeature(Product.find(), req.query).search();
+    const product = await apiFeature.query;
     return successResponse(res, product);
 });
 
