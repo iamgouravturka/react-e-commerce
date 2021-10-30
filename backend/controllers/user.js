@@ -5,6 +5,7 @@ const User = require("../models/user");
 const sendToken = require("../helper/jwtToken");
 const { use } = require("../routes/product");
 const sendMail = require("../helper/sendEmail");
+const crypto = require("crypto");
 
 //register
 exports.register = catchAyncError(async (req, res) => {
@@ -100,5 +101,37 @@ exports.forgotPassword = catchAyncError(async (req, res, next) => {
         user.resetPasswordExpire = undefined;
         return next(new ErrorHandler(err.message, 400));
     }
+
+});
+
+//Reset Password
+exports.resetPassword = catchAyncError(async (req, res, next) => {
+
+    // creating token hash
+    const resetPasswordToken = crypto
+        .createHash("sha256")
+        .update(req.params.token)
+        .digest("hex");
+
+    const user = await User.findOne({
+        resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if(!user) {
+        return next(new ErrorHandler("Reset Password Token is invalid or has been expired", 400));
+    }
+
+    if(req.body.password !== req.body.confirmPassword) {
+        return next(new ErrorHandler("Password does not match", 400));
+    }
+
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    sendToken(user, 200, res);
 
 });
