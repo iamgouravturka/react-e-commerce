@@ -142,3 +142,24 @@ exports.getMyProfile = catchAyncError(async (req, res, next) => {
 
     successResponse(res, user);
 });
+
+// Update Password
+exports.updatePassword = catchAyncError(async (req, res, next) => {
+    const user = await User.findById(req.user.id).select("+password");
+
+    const isPasswordMatched = user.comparePassword(req.body.oldPassword);
+
+    if(!isPasswordMatched) {
+        return next(new ErrorHandler("Old password is incorrect", 401));
+    }  
+    
+    if(req.body.newPassword !== req.body.confirmPassword) {
+        return next(new ErrorHandler("Password does not match", 400));
+    }  
+
+    user.password = req.body.newPassword;
+
+    await user.save();
+
+    sendToken(user, 200, res);
+});
