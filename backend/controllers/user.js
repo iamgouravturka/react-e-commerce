@@ -135,3 +135,10 @@ exports.resetPassword = catchAyncError(async (req, res, next) => {
     sendToken(user, 200, res);
 
 });
+
+//My Profile
+exports.getMyProfile = catchAyncError(async (req, res, next) => {
+    const user = await User.findById(req.user.id);
+
+    successResponse(res, user);
+});
