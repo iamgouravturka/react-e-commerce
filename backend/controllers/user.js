@@ -197,3 +197,33 @@ exports.getUserDetail = catchAyncError(async (req, res, next) => {
 
     successResponse(res, user);
 });
+
+// Update User Role (Admin)
+exports.updateRole = catchAyncError(async (req, res, next) => {
+    const newUserData = {
+        name: req.body.name,
+        email: req.body.email,
+        role: req.body.role,
+    } 
+
+    await User.findByIdAndUpdate(req.user.id, newUserData, {
+        new: true,
+        runValidators: true,
+        newFindAndModify: false
+    })
+
+    successResponse(res);
+}); 
+
+// Delete User (Admin)
+exports.deleteUser = catchAyncError(async (req, res, next) => {
+    const user = await User.findById(req.params.id);
+
+    if(!user) {
+        return next(new ErrorHandler(`User does not exist with Id: ${req.params.id}`));
+    }
+
+    await user.remove();
+
+    successResponse(res);
+});
