@@ -163,3 +163,19 @@ exports.updatePassword = catchAyncError(async (req, res, next) => {
 
     sendToken(user, 200, res);
 });
+
+// Update Profile
+exports.updateProfile = catchAyncError(async (req, res, next) => {
+    const newUserData = {
+        name: req.body.name,
+        email: req.body.email,
+    }
+
+    await User.findByIdAndUpdate(req.user.id, newUserData, {
+        new: true,
+        runValidators: true,
+        newFindAndModify: false
+    })
+
+    successResponse(res);
+});
