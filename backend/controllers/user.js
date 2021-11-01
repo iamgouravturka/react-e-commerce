@@ -2,7 +2,6 @@ const ErrorHandler = require("../helper/errorHandler");
 const { successResponse, errorResponse } = require("../helper/response");
 const catchAyncError = require("../middleware/catchAyncError");
 const User = require("../models/user");
-const ApiFeature = require("../helper/apiFeature");
 const sendToken = require("../helper/jwtToken");
 
 //register
@@ -47,4 +46,15 @@ exports.login = catchAyncError(async (req, res, next) => {
     const token = user.getJwtToken();
 
     sendToken(user, 200, res);
+});
+
+//logout
+exports.logout = catchAyncError(async (req, res, next) => {
+
+    res.cookie("token", null, {
+        expires: new Date(Date.now()),
+        httpOnly: true
+    });
+
+    successResponse(res);
 });
