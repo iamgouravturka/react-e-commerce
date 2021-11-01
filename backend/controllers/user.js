@@ -3,6 +3,8 @@ const { successResponse, errorResponse } = require("../helper/response");
 const catchAyncError = require("../middleware/catchAyncError");
 const User = require("../models/user");
 const sendToken = require("../helper/jwtToken");
+const { use } = require("../routes/product");
+const sendMail = require("../helper/sendEmail");
 
 //register
 exports.register = catchAyncError(async (req, res) => {
@@ -57,4 +59,46 @@ exports.logout = catchAyncError(async (req, res, next) => {
     });
 
     successResponse(res);
+});
+
+//Forgot Password
+exports.forgotPassword = catchAyncError(async (req, res, next) => {
+
+    const { email } = req.body;
+    
+    if(!email) {
+        return next(new ErrorHandler("Invalid Email Or Password", 401));
+    }
+
+    const user = await User.findOne({ email }).select("+password");
+
+    if(!user) {
+        return next(new ErrorHandler("Invalid Email Or Password", 401));
+    }
+
+    //Get reset token
+    const resetToken = user.getResetPasswordTokne();
+
+    await user.save({ validateBeforeSave: true });
+
+    const resetPasswordUrl = `${req.protocol}://${req.get("host")}/v1/api/password/reset/${resetToken}`;
+
+    const message = `Your password reset token is :- \n\n${resetPasswordUrl}\n\nIf you not requested this email please ignore this`;
+
+    try {
+
+        await sendMail({
+            email: user.email,
+            subject: 'Ecommerce Password Recovery',
+            message
+        })
+
+        successResponse(res, {message: `Email sent to ${user.email}`});
+    } catch(err) {
+
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        return next(new ErrorHandler(err.message, 400));
+    }
+
 });

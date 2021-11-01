@@ -19,7 +19,8 @@ exports.getAllProducts = catchAyncError(async (req, res) => {
 
 //Create Product
 exports.createProduct = catchAyncError(async (req, res) => {
-
+    req.body.user = req.user.id;
+    
     const product = await Product.create(req.body);
     return successResponse(res, product, 201);
 });
