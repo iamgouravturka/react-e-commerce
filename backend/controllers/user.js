@@ -179,3 +179,21 @@ exports.updateProfile = catchAyncError(async (req, res, next) => {
 
     successResponse(res);
 });
+
+// Get All Users (Admin)
+exports.getAllUsers = catchAyncError(async (req, res, next) => {
+    const users = await User.find();
+
+    successResponse(res, users);
+});
+
+// Get User Detail (Admin)
+exports.getUserDetail = catchAyncError(async (req, res, next) => {
+    const user = await User.findById(req.params.id);
+
+    if(!user) {
+        return next(new ErrorHandler(`User does not exist with Id: ${req.params.id}`));
+    }
+
+    successResponse(res, user);
+});
