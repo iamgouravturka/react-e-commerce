@@ -12,6 +12,6 @@ router.route("/logout").get(logout);
 
 router.route("/").get(isAuthenticatedUser, getMyProfile);
 router.route("/updatePassword").get(isAuthenticatedUser, updatePassword);
-router.route("/").patch(isAuthenticatedUser, updateProfile);
+router.route("/").get(isAuthenticatedUser, updateProfile);
 
 module.exports = router;
