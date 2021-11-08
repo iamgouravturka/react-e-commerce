@@ -13,8 +13,19 @@ exports.newOrder = catchAyncError(async (req, res) => {
 });
 
 //Get Order
-exports.getOrder = catchAyncError(async (req, res) => {
+exports.getOrderDetail = catchAyncError(async (req, res) => {
     const order = await Order.findById(req.params.id).populate("user", "name email");
+
+    if(!order) {
+        return next(new ErrorHandler("Order not found with this ID", 404));
+    }
+
+    successResponse(res, order);
+});
+
+//Get My Order
+exports.myOrder = catchAyncError(async (req, res) => {
+    const order = await Order.find({ user: req.user._id }).populate("user", "name email");
 
     if(!order) {
         return next(new ErrorHandler("Order not found with this ID", 404));
