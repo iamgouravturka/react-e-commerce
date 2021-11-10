@@ -2,6 +2,7 @@ const express = require("express");
 const products = require("./routes/product");
 const user = require("./routes/user");
 const order = require("./routes/order");
+const payment = require("./routes/payment");
 const cookieParser = require("cookie-parser");
 const errorMiddleware = require("./middleware/error");
 
@@ -14,6 +15,7 @@ const mainRouter = express.Router();
 mainRouter.use("/product", products);
 mainRouter.use("/user", user);
 mainRouter.use("/order", order);
+mainRouter.use("/payment", payment);
 
 app.use("/v1/api", mainRouter);
 app.use(errorMiddleware)
